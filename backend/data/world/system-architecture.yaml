@@ -1,0 +1,437 @@
+id: system-architecture
+name: LifeOS Model Architecture
+description: Multi-Model Cooperation Stack — the full backend architecture defining how LifeOS perceives, reasons, remembers, and acts
+locked: true
+
+overview:
+  summary: |
+    LifeOS operates as a multi-model cooperation stack where specialized subsystems
+    handle perception, cognition, memory, safety, and information integrity. The
+    Orchestrator sits at the center, routing tasks to the right specialist without
+    "thinking" deeply on its own. All inputs arrive at the Orchestrator and all
+    outputs leave from it.
+  design_principle: |
+    No single model does everything. The architecture distributes intelligence across
+    specialized layers — fast on-device models for quick decisions, large cloud models
+    for complex reasoning, dedicated perception models for environmental awareness —
+    all coordinated by the Orchestrator and checked by the Safety layer.
+
+# =============================================================================
+# 1. THE CENTRAL HUB
+# =============================================================================
+
+orchestrator:
+  id: orchestrator
+  name: The Orchestrator
+  role: Central Hub
+  description: |
+    The traffic controller and the only component that touches everything. It does not
+    "think" deeply on its own; rather, it routes tasks to the right specialist.
+  dependencies:
+    - perception_layer: Provides awareness of what is happening in the user's physical reality
+    - cognition_layer: Provides reasoning and decision-making capabilities
+    - personal_context: Provides knowledge, values, and privacy constraints
+    - information_integrity: Provides verified external information
+  flow: |
+    All inputs (user voice, video, external news) arrive here, and all outputs
+    (actions, answers) leave from here. The Orchestrator:
+    1. Receives input from Perception (current state)
+    2. Retrieves context from Personal Knowledge Graph
+    3. Routes to appropriate reasoning model (fast or slow)
+    4. Validates through Safety layer
+    5. Checks against Personal Constitution
+    6. Delivers output to user through appropriate device
+  responsibilities:
+    - Route tasks to appropriate specialist subsystems
+    - Synthesize information from multiple sources
+    - Make presentation decisions (Center/Periphery/Silence)
+    - Apply constitutional rules to all outputs
+    - Construct bounded intent experiences
+    - Maintain final authority over what reaches the user
+
+# =============================================================================
+# 2. INPUT & PERCEPTION LAYER ("The Senses")
+# =============================================================================
+
+perception_layer:
+  id: perception-layer
+  name: Input & Perception Layer
+  role: The Senses
+  position: Left side of architecture
+  description: |
+    Gives LifeOS "eyes and ears" to understand the user's immediate physical reality.
+    Converts raw sensory data into structured representations the system can reason about.
+
+  components:
+    - id: vlm
+      name: Vision-Language Models (VLM)
+      description: |
+        Takes raw data streams and converts them into text descriptions or embeddings
+        the AI can understand.
+      inputs:
+        - Video feed from AR glasses
+        - Audio from microphone
+        - Screen recording from phone/tablet
+      outputs:
+        - Text descriptions of visual scenes
+        - Embeddings for semantic matching
+        - Transcriptions of speech and ambient audio
+      processing: |
+        Raw multimodal data streams are processed into structured representations that
+        other components can consume. The VLM bridges the gap between physical reality
+        and digital understanding.
+
+    - id: world-models
+      name: World Models
+      description: |
+        The system's "intuition" about physics and time. Predicts what will happen next
+        in the user's environment.
+      capabilities:
+        - Predicts immediate future states (e.g., "user is walking toward a door; they will likely open it")
+        - Models physical causality and spatial relationships
+        - Tracks temporal patterns and rhythms
+      purpose: |
+        Provides anticipatory context so the system can prepare responses before they're
+        needed, enabling proactive rather than purely reactive assistance.
+
+    - id: perception-grounding
+      name: Perception and Grounding
+      role: The Bridge
+      description: |
+        Synthesizes raw data from the VLM and predictions from the World Model into a
+        coherent "current state" for the Orchestrator.
+      function: |
+        Without this component, the Orchestrator is blind to the user's physical context.
+        Perception and Grounding is the critical bridge that converts raw sensory data
+        and predictions into actionable situational awareness.
+      outputs:
+        - Coherent current state representation
+        - Confidence signals for mode activation
+        - Environmental context for intent surfacing
+
+# =============================================================================
+# 3. COGNITION & SAFETY STACK ("The Brain")
+# =============================================================================
+
+cognition_layer:
+  id: cognition-layer
+  name: Cognition & Safety Stack
+  role: The Brain
+  position: Top left of architecture
+  description: |
+    Once the Orchestrator understands the situation, it needs to figure out what to do.
+    Thinking is split into two speeds, modeled after System 1 vs. System 2 thinking
+    in psychology.
+
+  components:
+    - id: decision-making
+      name: Decision Making (System 1 — Fast)
+      thinking_speed: fast
+      description: |
+        Uses small, on-device models for quick tasks. Handles things like "turn on
+        the lights" or "schedule a reminder." Prioritizes speed and privacy.
+      characteristics:
+        - On-device processing (no cloud dependency)
+        - Low latency responses
+        - Privacy-preserving (data stays local)
+        - Handles routine, well-defined tasks
+      examples:
+        - Toggle smart home controls
+        - Schedule reminders
+        - Quick lookups from local knowledge
+        - Simple navigation commands
+
+    - id: large-scale-reasoning
+      name: Large-scale Reasoning (System 2 — Slow)
+      thinking_speed: slow
+      description: |
+        For complex problems, the system offloads to massive LLMs in the cloud that
+        can code, research, and plan over long horizons.
+      characteristics:
+        - Cloud-based processing (requires connectivity)
+        - Higher latency, deeper reasoning
+        - Can synthesize across many sources
+        - Long-horizon planning capability
+      examples:
+        - "Plan a travel itinerary based on my budget and these 5 articles"
+        - Complex research synthesis
+        - Multi-step planning with constraints
+        - Code generation and analysis
+      tool_use: |
+        System 2 models can invoke external tools — search engines, calculators,
+        code interpreters, booking APIs — as part of their reasoning chain.
+
+    - id: safety-governance-verification
+      name: Safety, Governance, and Verification
+      role: The Kill Switch
+      description: |
+        A critical checkpoint. Before any plan from the reasoning models is executed,
+        it must pass through this safety layer. The entire system relies on this to
+        prevent the AI from taking dangerous or unauthorized actions.
+      functions:
+        - name: Constraint Checking
+          description: Validates plans against user-defined boundaries and system limits
+        - name: Red-teaming
+          description: Actively tries to find flaws in proposed plans before execution
+        - name: Audit Logging
+          description: Logs all decisions and actions for retrospective review
+        - name: Authorization Verification
+          description: Ensures actions are within the scope of user consent
+      invariant: |
+        No plan reaches execution without passing through Safety. This is the
+        architectural guarantee that prevents autonomous action beyond user-authorized scope.
+
+# =============================================================================
+# 4. PERSONAL CONTEXT ("Memory & Values")
+# =============================================================================
+
+personal_context:
+  id: personal-context
+  name: Personal Context Layer
+  role: Memory & Values
+  position: Bottom center of architecture
+  description: |
+    What makes the OS "yours" rather than just a generic chatbot. Contains long-term
+    memory, personal values, and privacy governance.
+
+  components:
+    - id: personal-knowledge-graph
+      name: Personal Knowledge Graph (PKG)
+      role: Long-term Memory
+      description: |
+        Stores private data (emails, notes, history) and connects it to public knowledge.
+        Features provenance chips — the system remembers where it learned a fact.
+      features:
+        - name: Private Data Storage
+          description: Emails, notes, browsing history, conversation logs, health data
+        - name: Public Knowledge Integration
+          description: Connects personal data to world knowledge for richer context
+        - name: Provenance Chips
+          description: |
+            Every stored fact carries metadata about its origin. The system knows
+            WHERE it learned something (e.g., "I know you like sushi because you
+            emailed John about it on Tuesday").
+          purpose: |
+            Provenance enables trust, auditability, and the ability to retract
+            knowledge when sources are found unreliable.
+        - name: Relationship Mapping
+          description: Models connections between people, places, events, and preferences
+      flow: |
+        The Orchestrator queries the PKG for relevant context before making decisions.
+        The PKG provides the personalized information that transforms generic AI
+        responses into contextually appropriate assistance.
+
+    - id: personal-constitution
+      name: Personal Constitution
+      role: The Moral Compass
+      description: |
+        Contains explicit rules and values articulated by the user. The Orchestrator
+        checks every decision against this Constitution to ensure alignment with the
+        user's specific principles.
+      examples:
+        - "Never book flights on a Tuesday"
+        - "Prioritize privacy over convenience"
+        - "No work notifications during family dinner"
+        - "Prefer local businesses over chains"
+      function: |
+        The Constitution is not a preference list — it is an operational ruleset that
+        actively constrains system behavior. Constitutional rules override convenience
+        optimizations.
+
+    - id: privacy
+      name: Privacy
+      role: The Vault
+      description: |
+        A strict governance layer that manages data retention and ensures sensitive
+        memories are handled appropriately.
+      capabilities:
+        - name: Data Retention (TTLs)
+          description: Time-to-live policies that automatically expire sensitive data
+        - name: Redaction
+          description: Removes sensitive information from data before storage or sharing
+        - name: Deletion Policies
+          description: Ensures data is permanently removed when retention period expires
+        - name: Access Control
+          description: Governs which components can access which categories of personal data
+
+# =============================================================================
+# 5. INFORMATION INTEGRITY ("The Library")
+# =============================================================================
+
+information_integrity:
+  id: information-integrity
+  name: Information Integrity Stack
+  role: The Library
+  position: Right side of architecture
+  description: |
+    Responsible for ingesting the chaotic external world and cleaning it before it
+    touches personal data. Ensures information quality and alignment with user values.
+
+  components:
+    - id: external-provider-data
+      name: External Provider Data
+      role: The Raw Feed
+      description: |
+        The raw, unfiltered information from the outside world. These providers have
+        business models and agendas — they cannot directly reach the user.
+      sources:
+        - id: social-media
+          name: Social Media
+          examples: ["Instagram", "TikTok", "LinkedIn", "Facebook"]
+        - id: messaging
+          name: Messaging Platforms
+          examples: ["WhatsApp", "Telegram", "Signal"]
+        - id: news
+          name: News Outlets
+          examples: ["NYT", "WSJ", "Reuters", "AP"]
+        - id: navigation
+          name: Navigation Services
+          examples: ["Maps", "Traffic data", "Public transit"]
+        - id: commerce
+          name: Commerce & Services
+          examples: ["Spotify", "Apple Music", "Booking platforms"]
+        - id: other
+          name: Other Providers
+          description: Any external data source the system integrates with
+
+    - id: verification-provenance
+      name: Verification & Provenance
+      role: The Filter
+      description: |
+        Before external data reaches the user, it passes through deepfake detection
+        and source authentication. Verifies if the information is real.
+      capabilities:
+        - name: Deepfake Detection
+          description: Identifies AI-generated or manipulated media
+        - name: Source Authentication
+          description: Verifies the origin and authority of information sources
+        - name: Fact Verification
+          description: Cross-references claims against trusted knowledge bases
+        - name: Provenance Tracking
+          description: Maintains chain of custody for information from source to user
+
+    - id: constitutional-filtering
+      name: Constitutional Filtering
+      role: The Alignment Check
+      description: |
+        Filters verified data based on the user's Personal Constitution. Ensures
+        external information aligns with user-articulated values.
+      examples:
+        - Filtering clickbait when Constitution requests factual reporting
+        - Removing biased news when user values neutral perspectives
+        - Blocking engagement-optimized content that conflicts with attention values
+      flow: |
+        Verified external data → Constitutional rule matching → Filtered data that
+        aligns with user values → Passed to Information Augmentation
+
+    - id: information-augmentation
+      name: Information Augmentation (RAG)
+      role: The Synthesis
+      description: |
+        Retrieval-Augmented Generation — matches the user's current query with verified
+        external information and feeds contextualized results to the Orchestrator.
+      function: |
+        Combines verified external data with personal context to produce relevant,
+        trustworthy, and personalized information for the Orchestrator to present.
+      flow: |
+        User query → Retrieve relevant verified external data → Augment with personal
+        context → Generate contextualized response → Deliver to Orchestrator
+
+# =============================================================================
+# DATA FLOW
+# =============================================================================
+
+data_flow:
+  description: |
+    The complete path from user request to system response, demonstrating how all
+    layers cooperate.
+  example:
+    scenario: "User asks: Plan a dinner for my anniversary."
+    steps:
+      - step: 1
+        name: User Request
+        description: Voice or text input arrives at the Orchestrator
+        layer: orchestrator
+      - step: 2
+        name: Perception
+        description: VLM sees user is in their kitchen; World Model knows it's evening
+        layer: perception_layer
+      - step: 3
+        name: Context Retrieval
+        description: |
+          Orchestrator pings the Personal Knowledge Graph to recall anniversary date
+          and partner's allergies
+        layer: personal_context
+      - step: 4
+        name: External Search
+        description: |
+          Searches External Provider Data for restaurants. Verification layer removes
+          fake reviews; Constitutional Filtering removes restaurants that don't match
+          dietary values.
+        layer: information_integrity
+      - step: 5
+        name: Reasoning
+        description: |
+          Large-scale Reasoning model creates a plan: "Book table at X, order flowers from Y."
+        layer: cognition_layer
+      - step: 6
+        name: Safety Check
+        description: Safety module verifies the plan (e.g., checks if restaurant is within budget limits)
+        layer: cognition_layer
+      - step: 7
+        name: Execution
+        description: Decision Making model executes the booking tool
+        layer: cognition_layer
+      - step: 8
+        name: Output
+        description: Orchestrator displays the confirmation on the user's phone
+        layer: orchestrator
+
+# =============================================================================
+# CROSS-CUTTING CONCERNS
+# =============================================================================
+
+cross_cutting:
+  - id: privacy-by-design
+    name: Privacy by Design
+    description: |
+      Privacy is not an afterthought — it is enforced at every layer. On-device
+      processing is preferred. Cloud processing requires justification. Personal
+      data never leaves the Privacy vault without governance checks.
+
+  - id: constitutional-alignment
+    name: Constitutional Alignment Throughout
+    description: |
+      The Personal Constitution is not checked at one point — it influences decisions
+      at multiple layers: mode activation, intent surfacing, information filtering,
+      and action execution.
+
+  - id: auditability
+    name: Full Auditability
+    description: |
+      Every decision, from perception interpretation to action execution, is logged
+      and available for retrospective review through the Dashboard. The system can
+      always explain why it did what it did.
+
+  - id: graceful-degradation
+    name: Graceful Degradation
+    description: |
+      When cloud services are unavailable, the system falls back to on-device
+      capabilities (System 1). When perception is limited (fewer devices), the
+      system raises confirmation thresholds. No single component failure should
+      render the system useless.
+
+plausibility_notes:
+  year: 2030
+  assumptions:
+    - VLMs capable of real-time multimodal processing exist (trajectory from GPT-4V, Gemini)
+    - On-device SLMs are sufficient for routine tasks (trajectory from Apple Intelligence, Gemma)
+    - Cloud LLMs have reliable tool-use and planning (trajectory from current agent frameworks)
+    - RAG pipelines are mature and production-ready (already emerging in 2024-2025)
+    - Deepfake detection is viable but imperfect (arms race continues)
+    - World models for everyday scenarios are feasible (trajectory from video prediction models)
+  constraints:
+    - No artificial general intelligence assumed
+    - No perfect deepfake detection (probabilistic, not certain)
+    - Network connectivity required for System 2 reasoning
+    - Privacy governance requires legal/regulatory framework (GDPR descendants)

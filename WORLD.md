@@ -43,9 +43,78 @@ The current app-centric computing model creates cognitive overload through:
 
 ## 2. System Architecture
 
-### 2.1 Mode-Intent Separation [LOCKED]
+### 2.1 Multi-Model Cooperation Stack [LOCKED]
 
-This is the fundamental architectural decision of LifeOS.
+LifeOS operates as a **multi-model cooperation stack** where specialized subsystems handle perception, cognition, memory, safety, and information integrity. No single model does everything — intelligence is distributed across specialized layers coordinated by the Orchestrator.
+
+> **Full technical specification:** `backend/data/world/system-architecture.yaml`
+
+#### The Orchestrator (Central Hub)
+
+The traffic controller and the **only component that touches everything**. It does not "think" deeply on its own — it routes tasks to the right specialist.
+
+**Flow:** All inputs (user voice, video, external news) arrive here → routed to specialists → validated by Safety → checked against Constitution → outputs delivered to user.
+
+#### Perception Layer ("The Senses")
+
+Gives LifeOS eyes and ears to understand the user's immediate physical reality.
+
+| Component | Function |
+|-----------|----------|
+| **VLM (Vision-Language Models)** | Converts raw data streams (video, audio, screen) into text descriptions and embeddings |
+| **World Models** | System's "intuition" about physics and time — predicts what happens next in the user's environment |
+| **Perception & Grounding** | The Bridge — synthesizes VLM output and World Model predictions into a coherent "current state" for the Orchestrator |
+
+#### Cognition & Safety Stack ("The Brain")
+
+Splits thinking into two speeds, modeled after System 1 vs. System 2 in psychology.
+
+| Component | Speed | Location | Purpose |
+|-----------|-------|----------|---------|
+| **Decision Making** | Fast (System 1) | On-device | Quick tasks — lights, reminders, simple lookups. Prioritizes speed and privacy. |
+| **Large-scale Reasoning** | Slow (System 2) | Cloud | Complex planning, research synthesis, multi-step reasoning with tool use. |
+| **Safety, Governance, Verification** | — | Both | The Kill Switch — every plan must pass constraint checking, red-teaming, and audit logging before execution. |
+
+**Invariant:** No plan reaches execution without passing through Safety.
+
+#### Personal Context ("Memory & Values")
+
+What makes the OS *yours* rather than a generic chatbot.
+
+| Component | Role | Key Feature |
+|-----------|------|-------------|
+| **Personal Knowledge Graph** | Long-term Memory | Provenance chips — the system remembers *where* it learned each fact |
+| **Personal Constitution** | Moral Compass | Explicit user-articulated rules that actively constrain system behavior |
+| **Privacy** | The Vault | Data retention (TTLs), redaction, deletion policies, access control |
+
+#### Information Integrity Stack ("The Library")
+
+Ingests the chaotic external world and cleans it before it touches personal data.
+
+| Component | Role | Function |
+|-----------|------|----------|
+| **External Provider Data** | Raw Feed | Social media, news, messaging, navigation, commerce — providers have agendas and cannot directly reach users |
+| **Verification & Provenance** | The Filter | Deepfake detection, source authentication, fact verification |
+| **Constitutional Filtering** | Alignment Check | Filters verified data against Personal Constitution values |
+| **Information Augmentation (RAG)** | The Synthesis | Matches current query with verified external data, augmented by personal context |
+
+#### Data Flow Example
+
+```
+User: "Plan a dinner for my anniversary"
+
+1. Perception    → VLM sees kitchen; World Model knows it's evening
+2. Context       → PKG recalls anniversary date and partner's allergies
+3. External      → Search restaurants → Verify (remove fake reviews) → Constitutional Filter (dietary values)
+4. Reasoning     → System 2 creates plan: "Book table at X, order flowers from Y"
+5. Safety        → Verify plan (budget limits, authorization)
+6. Execution     → System 1 executes booking tool
+7. Output        → Confirmation displayed on phone
+```
+
+### 2.2 Mode-Intent Separation [LOCKED]
+
+This is the fundamental interaction-level architectural decision of LifeOS.
 
 | Concept | Definition | Who Controls | Key Characteristic |
 |---------|------------|--------------|-------------------|
@@ -60,7 +129,7 @@ This is the fundamental architectural decision of LifeOS.
 
 **Why this matters:** This separation is the core mechanism for preserving agency. Automation handles context assessment (reducing cognitive load) while humans retain action authority (preserving agency).
 
-### 2.2 Three-Layer Attention Model [LOCKED]
+### 2.3 Three-Layer Attention Model [LOCKED]
 
 Within any mode, information exists on an attention spectrum:
 
@@ -78,7 +147,7 @@ Within any mode, information exists on an attention spectrum:
 
 **Design principle:** This is calm technology in practice—information available at appropriate attention levels, not demanding attention or completely hidden.
 
-### 2.3 Provider-Orchestrator-Intent Flow [LOCKED]
+### 2.4 Provider-Orchestrator-Intent Flow [LOCKED]
 
 ```
 [Providers] → [Orchestrator] → [Constitutional Check] → [Intent Experience]
@@ -102,7 +171,7 @@ Within any mode, information exists on an attention spectrum:
 
 **Why apps become obsolete:** When the orchestrator can determine context (mode), surface relevant capabilities (available intents), generate purpose-built interfaces (intent experiences), and filter manipulation (constitutional validation)—the app as intermediary is no longer necessary.
 
-### 2.4 Dashboard: The Neutral Clearing [LOCKED]
+### 2.5 Dashboard: The Neutral Clearing [LOCKED]
 
 A timeline visualization with three temporal zones:
 
@@ -253,30 +322,91 @@ Every intent must have:
 
 ### 6.1 Two-Tier Model [LOCKED]
 
-**Information Interfaces (orchestration & primary interaction):**
-
-| Device | Role |
-|--------|------|
-| Phone/Tablet | Core orchestrator, real-time state detection, primary interaction |
-| Desktop | Computing hub, high-performance tasks, extended sessions |
-
-**Peripheral Interfaces (sensing & ambient output):**
-
-| Device | Role |
-|--------|------|
-| Neural Smartwatch | Biometric sensing, haptic feedback, ambient notifications |
-| AR Glasses | Ambient information display, environmental awareness |
-| Earphones | Audio output, voice input, contextual audio |
+**Architecture:** LifeOS operates through a two-tier device ecosystem. Information Interfaces handle orchestration and primary interaction; Peripheral Interfaces provide sensing and ambient output. Each device occupies a specific role in the attention spectrum.
 
 **Key principle:** Peripheral devices sense and output; they never orchestrate.
 
-### 6.2 Attention Layer Mapping
+### 6.2 Information Interface
 
-| Attention Layer | Peripheral Display |
-|-----------------|-------------------|
-| Center | Not shown on peripherals (requires primary device) |
-| Periphery | Indicated on watch/glasses (counts, presence) |
-| Silence | No indication on any device |
+**Foldable Tablet** — Core Information Interface
+
+| Characteristic | Description |
+|----------------|-------------|
+| Role | Primary orchestration device and interaction surface |
+| Properties | Immersive, Authoritative, Persistent |
+| Capabilities | Supports attention-heavy tasks and full workflows |
+| Form Factor | Dual mode: folded (phone-scale portability) / unfolded (tablet-scale workspace) |
+| Attention Layers | Center (full display), Periphery (glanceable sections) |
+
+The foldable tablet is the canonical information interface—it runs the orchestrator, synthesizes mode confidence signals, and provides the immersive surface for Center-layer content.
+
+### 6.3 Peripheral Interfaces
+
+**Neural Smartwatch** — Core Contextual Interface
+
+| Characteristic | Description |
+|----------------|-------------|
+| UI Modality | Spatial UI, Haptic-First Interaction |
+| Role | Real-time state detection and non-interrupting context control |
+| Sensing | Physiological state (HRV, skin conductance), usage patterns, location dynamics |
+| Ecosystems Integration | Temporal mapping (circadian rhythms), biometric fusion, movement patterns |
+| Health Domain | Stress indicators, energy levels, recovery state, sleep quality |
+| Output | Haptic notifications, peripheral awareness indicators (counts, not content) |
+| Attention Layers | Periphery (indicated presence), Silence (no indication) |
+
+The "neural" designation refers to advanced biometric sensing that captures physiological state for mode confidence signals. The watch is the primary sensing hub for contextual awareness.
+
+**Glass (AR Glasses)** — Core Contextual Interface
+
+| Characteristic | Description |
+|----------------|-------------|
+| UI Modality | Visual UI, Just-in-Time Ambient Perception |
+| Role | Visual situated intelligence and context-aware information overlays |
+| Sensing | Visual context (scene understanding), auditory gestures, environmental awareness |
+| Output | Location-aware AR overlays, micro-alerts that dissolve into periphery, facial recognition |
+| Embedded Knowledge | Just-in-time information as part of real-world interaction |
+| Attention Layers | Periphery (ambient overlays, subtle indicators), Silence (no display) |
+
+Glass provides ambient information augmentation without demanding attention. Overlays appear contextually and fade when not relevant. Never shows Center-layer content—that requires the primary interface.
+
+**Earphones** — Secondary Interface
+
+| Characteristic | Description |
+|----------------|-------------|
+| UI Modality | Audio UI, Secondary Conversational Perception |
+| Role | Audio-based awareness and voice interaction |
+| Sensing | Ambient interceptions (voice transcriptions, sentiment analysis), conversational input |
+| Output | Whispered summaries, bias alerts, fragmented sound reproduction, contextual audio cues |
+| Coupling | Ultra-loose (least orchestration dependency) |
+| Attention Layers | Periphery (subtle audio cues), Silence (no audio) |
+
+"Ultra-loose" coupling means earphones operate semi-independently for audio playback while respecting mode-based attention triage for notifications.
+
+### 6.4 Device Interaction Principles [LOCKED]
+
+1. **No Peripheral Orchestration**
+   - Peripheral devices never make mode decisions or orchestrate system state
+   - Only information interfaces have sufficient context for safe orchestration
+
+2. **Distributed Sensing**
+   - Multiple devices contribute different signal types for mode confidence
+   - Watch: biometrics; Glass: environmental; Earphones: audio; Tablet: interaction patterns
+
+3. **Output Appropriateness**
+   - Information delivered through most contextually appropriate device
+   - Haptic for non-interrupting awareness, visual for environmental context, audio for hands-free, immersive for attention-heavy work
+
+4. **Graceful Degradation**
+   - System functions with any subset of devices
+   - Reduced sensing → higher confirmation thresholds for mode activation
+
+### 6.5 Attention Layer Mapping [LOCKED]
+
+| Attention Layer | Peripheral Display | Rationale |
+|-----------------|-------------------|-----------|
+| Center | Not shown on peripherals | Center content requires immersive attention (tablet only) |
+| Periphery | Indicated on watch/glass/earphones | Awareness without demanding attention |
+| Silence | No indication on any device | Invisible until contextually appropriate |
 
 ---
 

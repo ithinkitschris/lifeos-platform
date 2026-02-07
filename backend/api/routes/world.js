@@ -65,6 +65,8 @@ router.get('/', (req, res) => {
   const meta = loadYaml(path.join(WORLD_PATH, 'meta.yaml'));
   const setting = loadYaml(path.join(WORLD_PATH, 'setting.yaml'));
   const thesis = loadYaml(path.join(WORLD_PATH, 'thesis.yaml'));
+  const devices = loadYaml(path.join(WORLD_PATH, 'devices.yaml'));
+  const systemArchitecture = loadYaml(path.join(WORLD_PATH, 'system-architecture.yaml'));
   const registry = loadYaml(path.join(DOMAINS_PATH, '_registry.yaml'));
   const openQuestions = loadYaml(path.join(WORLD_PATH, 'open-questions.yaml'));
 
@@ -83,6 +85,8 @@ router.get('/', (req, res) => {
     meta,
     setting,
     thesis,
+    devices,
+    systemArchitecture,
     domains,
     openQuestions: openQuestions?.questions || []
   });
@@ -174,6 +178,58 @@ router.put('/thesis', (req, res) => {
     res.json(thesis);
   } else {
     res.status(500).json({ error: 'Failed to save thesis.yaml' });
+  }
+});
+
+// ============================================
+// DEVICES (MULTIMODAL ECOSYSTEM)
+// ============================================
+
+// GET /api/world/devices - Device ecosystem
+router.get('/devices', (req, res) => {
+  const devices = loadYaml(path.join(WORLD_PATH, 'devices.yaml'));
+  if (!devices) {
+    return res.status(500).json({ error: 'Failed to load devices.yaml' });
+  }
+  res.json(devices);
+});
+
+// PUT /api/world/devices - Update device ecosystem
+router.put('/devices', (req, res) => {
+  const devicesPath = path.join(WORLD_PATH, 'devices.yaml');
+  const devices = req.body;
+
+  if (saveYaml(devicesPath, devices)) {
+    updateLastModified();
+    res.json(devices);
+  } else {
+    res.status(500).json({ error: 'Failed to save devices.yaml' });
+  }
+});
+
+// ============================================
+// SYSTEM ARCHITECTURE
+// ============================================
+
+// GET /api/world/system-architecture - Full system architecture
+router.get('/system-architecture', (req, res) => {
+  const architecture = loadYaml(path.join(WORLD_PATH, 'system-architecture.yaml'));
+  if (!architecture) {
+    return res.status(500).json({ error: 'Failed to load system-architecture.yaml' });
+  }
+  res.json(architecture);
+});
+
+// PUT /api/world/system-architecture - Update system architecture
+router.put('/system-architecture', (req, res) => {
+  const archPath = path.join(WORLD_PATH, 'system-architecture.yaml');
+  const architecture = req.body;
+
+  if (saveYaml(archPath, architecture)) {
+    updateLastModified();
+    res.json(architecture);
+  } else {
+    res.status(500).json({ error: 'Failed to save system-architecture.yaml' });
   }
 });
 
@@ -485,6 +541,12 @@ router.post('/versions', (req, res) => {
 
   // Copy thesis.yaml
   snapshot.files['thesis.yaml'] = loadYaml(path.join(WORLD_PATH, 'thesis.yaml'));
+
+  // Copy devices.yaml
+  snapshot.files['devices.yaml'] = loadYaml(path.join(WORLD_PATH, 'devices.yaml'));
+
+  // Copy system-architecture.yaml
+  snapshot.files['system-architecture.yaml'] = loadYaml(path.join(WORLD_PATH, 'system-architecture.yaml'));
 
   // Copy open-questions.yaml
   snapshot.files['open-questions.yaml'] = loadYaml(path.join(WORLD_PATH, 'open-questions.yaml'));

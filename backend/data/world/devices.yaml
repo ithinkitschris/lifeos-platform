@@ -1,0 +1,225 @@
+id: devices
+name: Multimodal Ecosystem
+description: The device ecosystem that comprises LifeOS 2030 - information and peripheral interfaces
+locked: true
+
+architecture:
+  model: two-tier
+  description: |
+    LifeOS operates through a two-tier device architecture: Information Interfaces
+    handle orchestration and primary interaction, while Peripheral Interfaces provide
+    sensing and ambient output. Peripheral devices never orchestrate.
+
+  principle: |
+    Each device occupies a specific role in the attention spectrum. Information
+    interfaces handle Center-layer content (immersive, authoritative). Peripheral
+    interfaces handle Periphery-layer awareness (ambient, non-interrupting).
+
+information_interfaces:
+  description: Devices that handle orchestration and primary user interaction
+  devices:
+    - id: foldable-tablet
+      name: Foldable Tablet
+      role: Core Information Interface
+      characteristics:
+        - Immersive
+        - Authoritative
+        - Persistent
+      capabilities:
+        - Supports attention-heavy tasks (full workflows)
+        - Primary orchestration device
+        - Real-time state detection
+        - Primary interaction surface
+      attention_layers:
+        - Center (full display)
+        - Periphery (glanceable sections)
+      ui_modality: Visual + Touch
+      notes: |
+        The foldable form factor provides both portable and extended workspace modes.
+        When folded, operates as standard phone. When unfolded, provides tablet-scale
+        immersive interface for attention-heavy work.
+
+peripheral_interfaces:
+  description: Devices that provide sensing and ambient output without orchestration
+  principle: Peripheral devices sense and output; they never orchestrate
+  devices:
+    - id: neural-smartwatch
+      name: Neural Smartwatch
+      role: Core Contextual Interface
+      ui_modality: Spatial UI
+      interaction_model: Haptic-First Interaction Interface
+      characteristics:
+        - Non-Interrupting Context Control
+        - Haptic-first feedback
+        - Continuous biometric sensing
+      capabilities:
+        sensing:
+          - name: Real-Time State Detection
+            description: Multi-signal physiological and usage context
+            signals:
+              - Physiological state (heart rate, HRV, skin conductance)
+              - Usage context (interaction patterns, gesture detection)
+              - Environmental context (location, movement, ambient conditions)
+          - name: Peripheral Ecosystems Integration
+            description: Temporal mapping and biometric fusion
+            features:
+              - Temporal mapping (circadian rhythms, energy patterns)
+              - Biometric fusion (multi-sensor synthesis)
+              - Location dynamics (movement patterns, place recognition)
+          - name: Health Domain Integration
+            description: Physiological readiness assessment
+            features:
+              - Stress indicators
+              - Energy levels
+              - Recovery state
+              - Sleep quality signals
+        output:
+          - Haptic notifications (non-interrupting)
+          - Peripheral awareness indicators (counts, not content)
+          - Ambient glanceable information
+      attention_layers:
+        - Periphery (indicated presence, counts)
+        - Silence (no indication)
+      notes: |
+        The "neural" designation refers to advanced biometric sensing capabilities
+        that capture physiological state for mode confidence signals. The watch serves
+        as the primary sensing hub for the LifeOS ecosystem.
+
+    - id: glass
+      name: Glass
+      role: Core Contextual Interface
+      ui_modality: Visual UI
+      interaction_model: Just-in-Time Ambient Perception
+      characteristics:
+        - Visual Situated Intelligence
+        - Context-aware AR overlays
+        - Non-interrupting ambient display
+      capabilities:
+        sensing:
+          - name: Multimodal Perception Cues
+            description: Synthesized environmental awareness
+            signals:
+              - Visual context (scene understanding, object recognition)
+              - Auditory gestures (ambient sound awareness)
+              - Haptic confirmation (interaction feedback)
+        output:
+          - name: Location-Aware AR
+            description: Contextual information overlays
+            features:
+              - Environmental overlays (place information, navigation cues)
+              - Micro-alerts that dissolve into periphery
+              - Facial recognition (for contact identification)
+          - name: Embedded Knowledge
+            description: Just-in-time contextual information
+            features:
+              - Information surfaced as part of real-world interaction
+              - Non-interrupting knowledge augmentation
+              - Context-sensitive content display
+      attention_layers:
+        - Periphery (ambient overlays, subtle indicators)
+        - Silence (no display)
+      notes: |
+        Glass provides ambient information augmentation without demanding attention.
+        Overlays appear contextually and dissolve into periphery when not relevant.
+        The device never shows Center-layer content - that requires primary interface.
+
+    - id: earphones
+      name: Earphones
+      role: Secondary Interface
+      ui_modality: Audio UI
+      interaction_model: Secondary Conversational Perception
+      characteristics:
+        - Audio-based awareness
+        - Voice interaction support
+        - Ambient sound processing
+      capabilities:
+        sensing:
+          - name: Ambient Interceptions
+            description: Environmental audio awareness
+            features:
+              - Voice transcriptions in silence (captures conversation for context)
+              - Sentiment analysis (emotional tone detection)
+          - name: Conversational Input
+            description: Voice-based interaction
+            features:
+              - Voice commands
+              - Natural language input
+              - Ambient conversation detection
+        output:
+          - name: Cognitive Support
+            description: Audio-based assistance
+            features:
+              - Whispered summaries (discrete information delivery)
+              - Bias alerts (decision-making support)
+              - Fragmented sound reproduction (attention-aware audio)
+          - name: Audio Notifications
+            description: Non-visual awareness
+            features:
+              - Subtle audio cues
+              - Voice-based alerts
+              - Contextual sound adjustment
+      attention_layers:
+        - Periphery (subtle audio cues)
+        - Silence (no audio)
+      coupling: Ultra-loose
+      notes: |
+        "Ultra-loose" coupling means earphones have the least orchestration dependency.
+        They can operate semi-independently for audio playback while still respecting
+        mode-based attention triage for notifications and interruptions.
+
+attention_layer_mapping:
+  description: How attention layers map to peripheral device display
+  rules:
+    - layer: Center
+      peripheral_display: Not shown on peripherals (requires primary device)
+      rationale: Center content requires immersive attention - tablet/phone only
+    - layer: Periphery
+      peripheral_display: Indicated on watch/glasses (counts, presence, ambient)
+      rationale: Peripheral devices show awareness without demanding attention
+    - layer: Silence
+      peripheral_display: No indication on any device
+      rationale: Silenced content remains invisible until contextually appropriate
+
+device_interaction_principles:
+  - id: no-peripheral-orchestration
+    name: No Peripheral Orchestration
+    description: Peripheral devices never make mode decisions or orchestrate system state
+    rationale: |
+      Orchestration requires full context synthesis and constitutional rule application.
+      Only information interfaces have sufficient compute and context to orchestrate safely.
+
+  - id: sensing-distribution
+    name: Distributed Sensing
+    description: Multiple devices contribute different signal types for mode confidence
+    rationale: |
+      Mode confidence requires multi-modal signal fusion. Watch provides biometric context,
+      glass provides environmental awareness, earphones provide ambient audio, tablet
+      provides interaction patterns.
+
+  - id: output-appropriateness
+    name: Output Appropriateness
+    description: Information is delivered through the most contextually appropriate device
+    rationale: |
+      Haptic for non-interrupting awareness (watch), ambient visual for environmental
+      context (glass), audio for hands-free scenarios (earphones), immersive for
+      attention-heavy work (tablet).
+
+  - id: graceful-degradation
+    name: Graceful Degradation
+    description: LifeOS functions with any subset of devices; full ecosystem is optimal but not required
+    rationale: |
+      User may not always wear all devices. System adapts mode confidence thresholds
+      based on available signal sources. Reduced sensing → higher confirmation thresholds.
+
+plausibility_notes:
+  year: 2030
+  assumptions:
+    - Foldable displays have matured (price, durability, software)
+    - AR glasses have achieved acceptable form factor (weight, battery, social acceptance)
+    - Biometric sensing has advanced (non-invasive neural state indicators)
+    - Multi-device orchestration protocols are standardized
+    - Battery technology supports all-day wear for peripheral devices
+  constraints:
+    - No brain-computer interfaces (too speculative for 2030)
+    - No implantables (social/ethical barriers)
+    - No magic - all capabilities grounded in emerging tech
